@@ -1,48 +1,99 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>AR 3D Model LM</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-      .instruction {
-        position: fixed;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        font-family: sans-serif;
-        z-index: 1000;
-        text-align: center;
+
+<head>
+  <title>AR 3D Model LM</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+
+  <!-- AR.js -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+  <!-- Gestos -->
+  <script src="https://unpkg.com/aframe-gesture-detector@3.0.0/dist/aframe-gesture-detector.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    .instruction {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 1000;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="instruction">
+    Aponte a câmera para o marcador "Hiro"<br>
+    Use 1 dedo para girar • 2 dedos para zoom ✨
+  </div>
+
+  <a-scene
+    embedded
+    arjs="sourceType: webcam; debugUIEnabled: false;"
+    gesture-detector>
+
+    <a-assets>
+      <a-asset-item id="logoModel" src="logo_atual.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- MARCADOR -->
+    <a-marker preset="hiro">
+
+      <a-entity id="logo"
+        gltf-model="#logoModel"
+        scale="1 1 1"
+        position="0 0.5 0"
+        rotation="0 0 0"
+        gesture-handler
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+      </a-entity>
+
+    </a-marker>
+
+    <a-entity camera></a-entity>
+
+  </a-scene>
+
+  <!-- SCRIPT DE INTERAÇÃO -->
+  <script>
+    AFRAME.registerComponent('gesture-handler', {
+      init: function () {
+        this.scale = this.el.object3D.scale.x;
+      },
+
+      events: {
+
+        // Girar com 1 dedo
+        onefingermove: function (event) {
+          this.el.object3D.rotation.y += event.detail.positionChange.x * 0.01;
+        },
+
+        // Zoom com 2 dedos
+        twofingermove: function (event) {
+          this.scale += event.detail.spreadChange / 200;
+          this.scale = Math.max(0.3, Math.min(this.scale, 3));
+          this.el.object3D.scale.set(this.scale, this.scale, this.scale);
+        }
+
       }
-    </style>
-  </head>
-  <body>
-    <div class="instruction">
-      Aponte a câmera para o marcador "Hiro"<br>
-      (Modelo 3D Real carregado!)
-    </div>
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      <a-assets>
-        <!-- Carregando o modelo 3D real -->
-        <a-asset-item id="logoModel" src="logo_atual.glb"></a-asset-item>
-      </a-assets>
+    });
+  </script>
 
-      <a-marker preset="hiro">
-        <!-- Exibe o modelo 3D real -->
-        <a-entity 
-          gltf-model="#logoModel" 
-          scale="1 1 1" 
-          position="0 0.5 0"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
-        </a-entity>
-      </a-marker>
+</body>
 
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
 </html>
